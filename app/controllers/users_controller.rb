@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
 
-	before_filter :signed_in_user, only: [:index, :edit, :update]
+	before_filter :signed_in_user, only: [:index, :edit, :update, :destroy, :following, :followers]
 	before_filter :correct_user, only: [:edit, :update]
 	before_filter :admin_user, only: :destroy
 
@@ -9,11 +9,11 @@ class UsersController < ApplicationController
 		@microposts = @user.microposts.paginate(page: params[:page])
 	end
 
-  def new
-  	@user = User.new
-  end
+	def new
+  		@user = User.new
+  	end
 
-  def create
+  	def create
 		@user = User.new(params[:user])
 		if @user.save
 			sign_in @user
@@ -50,9 +50,23 @@ class UsersController < ApplicationController
 		@users = User.paginate(page: params[:page])
 	end
 
+	def following
+		@title = "Following"
+		@user = User.find(params[:id])
+		@users = @user.followed_users.paginate(page: params[:page])
+		render 'show follow'
+	end
+	
+	def followers
+		@title = "Followers"
+		@user = User.find(params[:id])
+		@users = @user.followers.paginate(page: params[:page])
+		render 'show follow'
+	end
+
 	private
 		def signed_in_user
-			redirect_to signin_path, notice: "Please sign in." unless signed in?
+			redirect_to signin_path, notice: "Please sign in." unless signed_in?
 		end
 
 		def correct_user
